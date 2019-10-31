@@ -23,6 +23,8 @@ else
 fi
 
 LOADED_CLASS_COUNT=$(${vendor_dir}/class-file-counter /workspace/BOOT-INF 2> /dev/null)
+# Load Factor = 60%
+LOADED_CLASS_COUNT=$((LOADED_CLASS_COUNT * 6 / 10))
 echo "---> Loaded Classes: ${LOADED_CLASS_COUNT}"
 
 cat <<EOF >  ${memorycalculatorlayer}/profile.d/memorycalculator
