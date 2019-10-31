@@ -26,17 +26,17 @@ LOADED_CLASS_COUNT=$(${vendor_dir}/class-file-counter /workspace/BOOT-INF 2> /de
 echo "---> Loaded Classes: ${LOADED_CLASS_COUNT}"
 
 cat <<EOF >  ${memorycalculatorlayer}/profile.d/memorycalculator
-HEAD_ROOM=\${BPL_HEAD_ROOM:-0}
+TOTAL_MEMORY=\${BPL_TOTAL_MEMORY:-\$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)}
 LOADED_CLASS_COUNT=\${BPL_LOADED_CLASS_COUNT:-${LOADED_CLASS_COUNT}}
 THREAD_COUNT=\${BPL_THREAD_COUNT:-200}
-TOTAL_MEMORY=\${BPL_TOTAL_MEMORY:-\$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)}
+HEAD_ROOM=\${BPL_HEAD_ROOM:-0}
 
 JVM_MEMORY_CONFIGURATION=\$(${memorycalculatorlayer}/java-buildpack-memory-calculator \\
-  --head-room "\${HEAD_ROOM}" \\
-  --jvm-options "\${JAVA_OPTS}" \\
+  --total-memory "\${TOTAL_MEMORY}" \\
   --loaded-class-count "\${LOADED_CLASS_COUNT}" \\
   --thread-count "\${THREAD_COUNT}" \\
-  --total-memory "\${TOTAL_MEMORY}")
+  --jvm-options "\${JAVA_OPTS}" \\
+  --head-room "\${HEAD_ROOM}")
 
 echo "JVM Memory Configuration: \${JVM_MEMORY_CONFIGURATION}"
 export JAVA_OPTS="\${JAVA_OPTS} \${JVM_MEMORY_CONFIGURATION}"
