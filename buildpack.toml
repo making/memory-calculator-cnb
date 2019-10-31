@@ -1,0 +1,29 @@
+# Buildpack API version
+api = "0.2"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "am.ik.buildpacks.memorycalculator"
+version = "0.1.0"
+name = "Memory Calculator Buildpack"
+
+# Stacks that the buildpack will work with
+[[stacks]]
+id = "heroku-18"
+
+[[stacks]]
+id = "io.buildpacks.stacks.bionic"
+
+[[stacks]]
+id = "org.cloudfoundry.stacks.cflinuxfs3"
+
+[[metadata.dependencies]]
+id = "memory-calculator"
+name = "Memory Calculator"
+version = "4.0.0"
+uri = "https://repo.spring.io/libs-release-local/org/cloudfoundry/java-buildpack-memory-calculator/4.0.0/java-buildpack-memory-calculator-4.0.0.tgz"
+sha256 = "90d40eab6959a7b4059c6409c4505040e8a04f75a481f7282e53430df3edda3e"
+
+  [[metadata.dependencies.licenses]]
+  type = "Apache-2.0"
+  uri = "https://github.com/cloudfoundry/java-buildpack-memory-calculator/blob/master/LICENSE"

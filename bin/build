@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "---> Memory Calculator Buildpack"
+
+layersdir=$1
+buildpack_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+vendor_dir=${buildpack_dir}/vendor
+
+### Memory Calcurator
+
+memorycalculatorlayer="$layersdir"/memorycalculator
+mkdir -p ${memorycalculatorlayer}/profile.d
+
+local_checksum=$(sha256sum $(ls ${vendor_dir}/java-buildpack-memory-calculator-*.tgz 2>/dev/null | head -1) | cut -d ' ' -f 1 || echo 'not found')
+remote_checksum=$(cat "$memorycalculatorlayer.toml" 2>/dev/null | grep metadata  | tr -d '"' | sed 's/metadata = //' || echo 'not found')
+
+if [[ "${local_checksum}" == "${remote_checksum}" ]] ; then
+  echo "---> Resuing cached layer"
+else
+  echo "---> Installing Memory Calculator"
+  tar xzf ${vendor_dir}/java-buildpack-memory-calculator-*.tgz -C ${memorycalculatorlayer}
+fi
+
+LOADED_CLASS_COUNT=$(${vendor_dir}/class-file-counter /workspace/BOOT-INF 2> /dev/null)
+echo "---> Loaded Classes: ${LOADED_CLASS_COUNT}"
+
+cat <<EOF >  ${memorycalculatorlayer}/profile.d/memorycalculator
+HEAD_ROOM=\${BPL_HEAD_ROOM:-0}
+LOADED_CLASS_COUNT=\${BPL_LOADED_CLASS_COUNT:-${LOADED_CLASS_COUNT}}
+THREAD_COUNT=\${BPL_THREAD_COUNT:-200}
+TOTAL_MEMORY=\${BPL_TOTAL_MEMORY:-\$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)}
+
+JVM_MEMORY_CONFIGURATION=\$(${memorycalculatorlayer}/java-buildpack-memory-calculator \\
+  --head-room "\${HEAD_ROOM}" \\
+  --jvm-options "\${JAVA_OPTS}" \\
+  --loaded-class-count "\${LOADED_CLASS_COUNT}" \\
+  --thread-count "\${THREAD_COUNT}" \\
+  --total-memory "\${TOTAL_MEMORY}")
+
+echo "JVM Memory Configuration: \${JVM_MEMORY_CONFIGURATION}"
+export JAVA_OPTS="\${JAVA_OPTS} \${JVM_MEMORY_CONFIGURATION}"
+EOF
+
+cat <<EOF > $memorycalculatorlayer.toml
+cache = true
+launch = true
+metadata = "${local_checksum}"
+EOF
