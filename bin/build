@@ -30,6 +30,9 @@ TOTAL_MEMORY=\${BPL_TOTAL_MEMORY:-\$(cat /sys/fs/cgroup/memory/memory.limit_in_b
 LOADED_CLASS_COUNT=\${BPL_LOADED_CLASS_COUNT:-${LOADED_CLASS_COUNT}}
 THREAD_COUNT=\${BPL_THREAD_COUNT:-200}
 HEAD_ROOM=\${BPL_HEAD_ROOM:-0}
+if [ "\$TOTAL_MEMORY" = "9223372036854771712" ];then
+  TOTAL_MEMORY=1G
+fi
 
 JVM_MEMORY_CONFIGURATION=\$(${memorycalculatorlayer}/java-buildpack-memory-calculator \\
   --total-memory "\${TOTAL_MEMORY}" \\
