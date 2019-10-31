@@ -4,7 +4,7 @@ api = "0.2"
 # Buildpack ID and metadata
 [buildpack]
 id = "am.ik.buildpacks.memorycalculator"
-version = "0.1.0"
+version = "0.1.1"
 name = "Memory Calculator Buildpack"
 
 # Stacks that the buildpack will work with
